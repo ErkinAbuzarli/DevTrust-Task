@@ -1,8 +1,7 @@
 namespace DevTrust_Task.Models
 {
-    public class Person
+    public class Person : Identification
     {
-        public long Id { get; set; }
 
         public string FirstName { get; set; }
 

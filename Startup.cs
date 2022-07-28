@@ -18,6 +18,7 @@ namespace DevTrust_Task
 {
     public class Startup
     {
+        static public long ADDRESS_LAST_ID = 0, PERSON_LAST_ID = 0;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;

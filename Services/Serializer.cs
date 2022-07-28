@@ -1,11 +1,24 @@
+using DevTrust_Task.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace DevTrust_Task.Services
 {
     public class Service : IServices
     {
+
+        private readonly DevTrustContext _context;
+
+        public Service(DevTrustContext context)
+        {
+            _context = context;
+        }
+
+
+
         public string CutBothSideIfNeeded(string str)
         {
             if (str[0] != 34 && str[0] != 39 && str[0] != 123 && str[0] != 8216)
@@ -26,6 +39,36 @@ namespace DevTrust_Task.Services
             }
             return 0;
         }
+
+        public long GetId(Type search)
+        {
+            Type type = _context.GetType();
+
+            IList<PropertyInfo> props =
+                new List<PropertyInfo>(type.GetProperties());
+
+
+            foreach(PropertyInfo prop in props)
+            {
+                if (prop.Name.Equals(search.Name))
+                {
+                    IQueryable<Models.Identification> dbSet = (IQueryable<Models.Identification>) prop.GetValue(_context);
+                    try
+                    {
+                        return dbSet.Max(p => p.Id) + 1;
+                    }
+                    catch
+                    {
+                        return 1;
+                    }
+                }
+            }
+            return 1;
+
+             
+        }
+
+
 
         public Dictionary<string, dynamic> DeserializeToDictionary(string json)
         {
@@ -80,8 +123,16 @@ namespace DevTrust_Task.Services
         public object Deserialize(dynamic obj, string json)
         {
             Dictionary<string, dynamic> data = DeserializeToDictionary(json);
-
-            Type myType = obj.GetType();
+            Type myType;
+            try
+            {
+                myType = obj.PropertyType;
+                obj = Activator.CreateInstance(myType);
+            }
+            catch (System.Exception)
+            {
+                myType = obj.GetType();
+            }
 
             IList<PropertyInfo> props =
                 new List<PropertyInfo>(myType.GetProperties());
@@ -102,11 +153,12 @@ namespace DevTrust_Task.Services
                     {
                         prop.SetValue(obj,
                             Deserialize(prop, data[propertyName]));
+
                     }
                         
                 }
-                else if (propertyName is "id") prop.SetValue(obj, 1);
-                else prop.SetValue(obj, null);
+                else if (propertyName is "id") prop.SetValue(obj, GetId(myType));
+                else prop.SetValue(obj, (long)1);
             }
             return obj;
         }

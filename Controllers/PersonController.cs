@@ -24,6 +24,18 @@ namespace DevTrust_Task.Controllers
             _services = services;
         }
 
+        [HttpGet("/save/{json}")]
+        public Task<long> Save( string json)
+        {
+            Console.WriteLine(json);
+
+            Person person = new Person();
+
+            person = (Person) _services.Deserialize(person, json);
+
+            return _personRepository.Save(person);
+        }
+
         [HttpGet("/all/{request}")]
         public async Task<ActionResult<string>> GetAll(string request)
         {

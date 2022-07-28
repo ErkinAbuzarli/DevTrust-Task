@@ -1,8 +1,7 @@
 namespace DevTrust_Task.Models
 {
-    public class Address
+    public class Address : Identification
     {
-        public long Id { get; set; }
 
         public string City { get; set; }
 
