@@ -27,8 +27,6 @@ namespace DevTrust_Task.Controllers
         [HttpGet("/save/{json}")]
         public Task<long> Save(string json)
         {
-            Console.WriteLine (json);
-
             Person person = new Person();
 
             person = (Person) _services.Deserialize(person, json);
