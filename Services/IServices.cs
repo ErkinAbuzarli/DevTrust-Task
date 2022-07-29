@@ -6,6 +6,7 @@ namespace DevTrust_Task.Services
 {
     public interface IServices
     {
-        Object Deserialize(Object @object, string json);
+        Object Deserialize(dynamic obj, string json);
+        string Serialize(dynamic obj);
     }
 }

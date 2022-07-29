@@ -36,35 +36,33 @@ namespace DevTrust_Task.Controllers
             return _personRepository.Save(person);
         }
 
-        [HttpGet("/all/{request}")]
-        public async Task<ActionResult<string>> GetAll(string request)
+        [HttpGet("/all/{request_string}")]
+        public async Task<string> GetAll(string request_string)
         {
-            Person allRequest = new Person();
+            GetAllRequest requests = new GetAllRequest();
+            requests = (GetAllRequest) _services.Deserialize(requests, request_string);
+            List<Person> people;
+            string json = "{";
 
-            allRequest = (Person) _services.Deserialize(allRequest, request);
+            people = await _personRepository.GetAll(requests);
 
-            Console.WriteLine(allRequest.Address.AddressLine);
-            //foreach (KeyValuePair<string, dynamic>
-            //    kvp
-            //    in
-            //    _services.Serialize(request)
-            //)
-            //{
-            //    //textBox3.Text += ("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            //    Console.WriteLine("Key = {0}", kvp.Key);
-            //}
-            //foreach (KeyValuePair<string, dynamic>
-            //    kvp
-            //    in
-            //    _services.Serialize(request)["address"]
-            //)
-            //{
-            //    //textBox3.Text += ("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            //    Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            //}
-            //string ans = await _personRepository.GetAll(allRequest);
-            //System.Console.Write (ans);
-            return Ok();
+            if (people.Count == 0) return "-1";
+            if (people.Count == 1)
+
+                return _services.Serialize(people[0]);
+            
+
+            foreach(Person person in people)
+            {
+                json += _services.Serialize(person) +",";
+
+            }
+            json = json.Substring(0, json.Length - 1) + "}";
+
+
+
+
+            return json;
         }
     }
 }

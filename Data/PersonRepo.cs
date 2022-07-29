@@ -3,6 +3,7 @@ using DevTrust_Task.DTOs;
 using DevTrust_Task.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,9 +20,16 @@ namespace DevTrust_Task.Data
         }
 
 
-        public async Task<string> GetAll(GetAllRequest request)
+        public async Task<List<Person>> GetAll(GetAllRequest request)
         {
-            return _context.Person.FirstAsync(p => p.Id == 1).Id.ToString();
+
+            
+            List<Person> people = await _context.Person.Where(p => (p.FirstName == request.FirstName || request.FirstName == null) && (p.LastName == request.LastName || request.LastName == null) && (p.Address.City == request.City || request.City == null) ).ToListAsync(); 
+            foreach(Person person in people)
+            {
+                person.Address = await _context.Address.FirstAsync(p => p.Id == person.AddressId);
+            }
+            return people;
         }
 
 

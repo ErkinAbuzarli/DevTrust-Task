@@ -48,11 +48,11 @@ namespace DevTrust_Task.Services
                 new List<PropertyInfo>(type.GetProperties());
 
 
-            foreach(PropertyInfo prop in props)
+            foreach (PropertyInfo prop in props)
             {
                 if (prop.Name.Equals(search.Name))
                 {
-                    IQueryable<Models.Identification> dbSet = (IQueryable<Models.Identification>) prop.GetValue(_context);
+                    IQueryable<Models.Identification> dbSet = (IQueryable<Models.Identification>)prop.GetValue(_context);
                     try
                     {
                         return dbSet.Max(p => p.Id) + 1;
@@ -65,7 +65,7 @@ namespace DevTrust_Task.Services
             }
             return 1;
 
-             
+
         }
 
 
@@ -142,25 +142,66 @@ namespace DevTrust_Task.Services
                 string propertyName = prop.Name.ToLower();
                 if (data.ContainsKey(propertyName))
                 {
-                    if (prop.PropertyType == typeof (string))
+                    if (prop.PropertyType == typeof(string))
                         prop.SetValue(obj, data[propertyName]);
-                    else if (prop.PropertyType == typeof (long))
+                    else if (prop.PropertyType == typeof(long))
                         prop.SetValue(obj, long.Parse(data[propertyName]));
-                    else if (prop.PropertyType == typeof(Int64))
-
-                        prop.SetValue(obj, 1);
                     else
                     {
                         prop.SetValue(obj,
                             Deserialize(prop, data[propertyName]));
 
                     }
-                        
+
                 }
                 else if (propertyName is "id") prop.SetValue(obj, GetId(myType));
-                else prop.SetValue(obj, (long)1);
+                else prop.SetValue(obj, null);
             }
             return obj;
+        }
+
+
+        public string Serialize(dynamic obj)
+        {
+            Type myType;
+            string json = "{ ";
+            try
+            {
+                myType = obj.PropertyType;
+                obj = Activator.CreateInstance(myType);
+            }
+            catch (System.Exception)
+            {
+                myType = obj.GetType();
+            }
+
+            IList<PropertyInfo> props =
+                new List<PropertyInfo>(myType.GetProperties());
+
+            foreach (PropertyInfo prop in props)
+            {
+                bool isString = prop.PropertyType == typeof(string);
+                json += "\"" + prop.Name.ToLower() + "\":";
+                if (prop.PropertyType.IsClass && !isString)
+                            json += Serialize(prop.GetValue(obj)) + ",";
+
+                else
+                        {
+                    if (isString) json += "\"";
+                            json += prop.GetValue(obj).ToString();
+
+                    if (isString) json += "\"";
+
+
+                    json += ",";
+                }
+
+            }
+
+            json = json.Substring(0, json.Length - 1) + "}";
+            
+
+            return json;
         }
     }
 }
