@@ -7,12 +7,12 @@ using System.Reflection;
 
 namespace DevTrust_Task.Services
 {
-    public class Service : IServices
+    public class Serializer : ISerializer
     {
 
         private readonly DevTrustContext _context;
 
-        public Service(DevTrustContext context)
+        public Serializer(DevTrustContext context)
         {
             _context = context;
         }
@@ -84,7 +84,6 @@ namespace DevTrust_Task.Services
             while (json != null && json != "")
             {
                 devided_json = json.Split(":", 2);
-                Console.WriteLine("{0} {1}", devided_json[0], devided_json[1]);
                 key = CutBothSideIfNeeded(devided_json[0].Trim()).ToLower();
                 value = devided_json[1].Trim();
 
@@ -134,10 +133,7 @@ namespace DevTrust_Task.Services
                 myType = obj.GetType();
             }
 
-            IList<PropertyInfo> props =
-                new List<PropertyInfo>(myType.GetProperties());
-
-            foreach (PropertyInfo prop in props)
+            foreach (PropertyInfo prop in myType.GetProperties())
             {
                 string propertyName = prop.Name.ToLower();
                 if (data.ContainsKey(propertyName))
@@ -172,10 +168,7 @@ namespace DevTrust_Task.Services
                 myType = obj.GetType();
             }
 
-            IList<PropertyInfo> props =
-                new List<PropertyInfo>(myType.GetProperties());
-
-            foreach (PropertyInfo prop in props)
+            foreach (PropertyInfo prop in myType.GetProperties())
             {
                 bool isString = prop.PropertyType == typeof(string);
                 json += "\"" + prop.Name.ToLower() + "\":";

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DevTrust_Task;
 using DevTrust_Task.DTOs;
@@ -36,6 +37,7 @@ namespace DevTrust_Task.Data
                         p.Address.City == request.City || request.City == null
                         ))
                     .ToListAsync();
+                    
             foreach (Person person in people)
             {
                 person.Address =
@@ -43,6 +45,8 @@ namespace DevTrust_Task.Data
                         .Address
                         .FirstAsync(p => p.Id == person.AddressId);
             }
+
+            await _context.SaveChangesAsync();
             return people;
         }
 
@@ -50,11 +54,17 @@ namespace DevTrust_Task.Data
         {
             try
             {
-                Person existed = _context.Person.First(a => a.Id == person.Id);
-                _context.Person.Update(person);
+                Person existed = await _context.Person.FindAsync(person.Id);
+
+
+                foreach(PropertyInfo prop in typeof(Person).GetProperties())
+                    prop.SetValue(existed, prop.GetValue(person));
+                
+                await _context.SaveChangesAsync();
             }
-            catch(Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 await _context.Person.AddAsync(person);
             }
 

@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DevTrust_Task.DTOs;
 using DevTrust_Task.Data;
+using DevTrust_Task.Models;
 using DevTrust_Task.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using DevTrust_Task.Models;
 
 namespace DevTrust_Task.Controllers
 {
@@ -13,11 +13,11 @@ namespace DevTrust_Task.Controllers
     {
         private readonly IPersonRepo _personRepository;
 
-        private readonly IServices _services;
+        private readonly ISerializer _services;
 
         public PersonController(
             IPersonRepo personRepository,
-            IServices services
+            ISerializer services
         )
         {
             _personRepository = personRepository;
@@ -25,9 +25,9 @@ namespace DevTrust_Task.Controllers
         }
 
         [HttpGet("/save/{json}")]
-        public Task<long> Save( string json)
+        public Task<long> Save(string json)
         {
-            Console.WriteLine(json);
+            Console.WriteLine (json);
 
             Person person = new Person();
 
@@ -40,27 +40,21 @@ namespace DevTrust_Task.Controllers
         public async Task<string> GetAll(string request_string)
         {
             GetAllRequest requests = new GetAllRequest();
-            requests = (GetAllRequest) _services.Deserialize(requests, request_string);
+            requests =
+                (GetAllRequest) _services.Deserialize(requests, request_string);
             List<Person> people;
             string json = "{";
 
             people = await _personRepository.GetAll(requests);
 
             if (people.Count == 0) return "-1";
-            if (people.Count == 1)
+            if (people.Count == 1) return _services.Serialize(people[0]);
 
-                return _services.Serialize(people[0]);
-            
-
-            foreach(Person person in people)
+            foreach (Person person in people)
             {
-                json += _services.Serialize(person) +",";
-
+                json += _services.Serialize(person) + ",";
             }
             json = json.Substring(0, json.Length - 1) + "}";
-
-
-
 
             return json;
         }
