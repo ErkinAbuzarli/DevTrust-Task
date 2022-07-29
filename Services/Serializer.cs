@@ -98,8 +98,8 @@ namespace DevTrust_Task.Services
                     else
                         json =
                             value
-                                .Substring(closeBracket + 1,
-                                value.Length - closeBracket);
+                                .Substring(closeBracket + 2,
+                                value.Length - closeBracket-2);
                 }
                 else
                 {
@@ -142,16 +142,13 @@ namespace DevTrust_Task.Services
                 string propertyName = prop.Name.ToLower();
                 if (data.ContainsKey(propertyName))
                 {
-                    if (prop.PropertyType == typeof(string))
-                        prop.SetValue(obj, data[propertyName]);
-                    else if (prop.PropertyType == typeof(long))
-                        prop.SetValue(obj, long.Parse(data[propertyName]));
-                    else
-                    {
+                    bool isString = prop.PropertyType == typeof(string);
+                    if (prop.PropertyType.IsClass && !isString)
                         prop.SetValue(obj,
                             Deserialize(prop, data[propertyName]));
-
-                    }
+                    else if (isString) prop.SetValue(obj, data[propertyName]);
+                    
+                    else prop.SetValue(obj, long.Parse(data[propertyName]));
 
                 }
                 else if (propertyName is "id") prop.SetValue(obj, GetId(myType));
